@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+
+<title>Dashboard</title>
+
+<th:block th:fragment="content">
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1" style="color:#1e293b">Dashboard Overview</h5>
+        <small class="text-muted" th:text="${#temporals.format(#temporals.createNow(), 'EEEE, dd MMMM yyyy')}">Today</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a th:href="@{/admin/products/new}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>New Product
+        </a>
+        <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer"></i>
+        </button>
+    </div>
+</div>
+
+<!-- ═══ STAT CARDS ROW 1 ═══ -->
+<div class="row g-3 mb-4">
+    <!-- Total Revenue -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box" style="background:#ede9fe">
+                    <i class="bi bi-currency-dollar" style="color:#7c3aed"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-500 mb-1">Total Revenue</div>
+                    <div class="fw-bold fs-5" style="color:#1e293b">
+                        ৳<span th:text="${#numbers.formatDecimal(totalRevenue ?: 0, 1, 'COMMA', 0, 'POINT')}">0</span>
+                    </div>
+                    <div class="small text-success mt-1">
+                        <i class="bi bi-arrow-up-short"></i>
+                        ৳<span th:text="${#numbers.formatDecimal(todayRevenue ?: 0, 1, 'COMMA', 0, 'POINT')}">0</span> today
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Orders -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box" style="background:#dbeafe">
+                    <i class="bi bi-bag-check" style="color:#2563eb"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-500 mb-1">Total Orders</div>
+                    <div class="fw-bold fs-5" style="color:#1e293b" th:text="${totalOrders}">0</div>
+                    <div class="small text-success mt-1">
+                        <i class="bi bi-arrow-up-short"></i>
+                        <span th:text="${todayOrders}">0</span> new today
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Products -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box" style="background:#dcfce7">
+                    <i class="bi bi-box-seam" style="color:#16a34a"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-500 mb-1">Total Products</div>
+                    <div class="fw-bold fs-5" style="color:#1e293b" th:text="${totalProducts}">0</div>
+                    <div class="small text-warning mt-1">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span th:text="${lowStockProducts}">0</span> low stock
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Users -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card stat-card h-100">
+            <div class="card-body d-flex align-items-center gap-3 p-4">
+                <div class="icon-box" style="background:#fef3c7">
+                    <i class="bi bi-people" style="color:#d97706"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="text-muted small fw-500 mb-1">Total Users</div>
+                    <div class="fw-bold fs-5" style="color:#1e293b" th:text="${totalUsers}">0</div>
+                    <div class="small text-success mt-1">
+                        <i class="bi bi-arrow-up-short"></i>
+                        <span th:text="${todayUsers}">0</span> joined today
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ STAT CARDS ROW 2 ═══ -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card border-0 p-3" style="background:#fff7ed;border-radius:12px">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-muted">Pending</div>
+                    <div class="fw-bold fs-5 text-warning" th:text="${pendingOrders}">0</div>
+                </div>
+                <i class="bi bi-hourglass-split text-warning fs-4"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 p-3" style="background:#f0fdf4;border-radius:12px">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-muted">Delivered</div>
+                    <div class="fw-bold fs-5 text-success" th:text="${deliveredOrders}">0</div>
+                </div>
+                <i class="bi bi-check-circle text-success fs-4"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 p-3" style="background:#fef2f2;border-radius:12px">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-muted">Cancelled</div>
+                    <div class="fw-bold fs-5 text-danger" th:text="${cancelledOrders}">0</div>
+                </div>
+                <i class="bi bi-x-circle text-danger fs-4"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card border-0 p-3" style="background:#f0f9ff;border-radius:12px">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-muted">Open Tickets</div>
+                    <div class="fw-bold fs-5 text-info" th:text="${openTickets}">0</div>
+                </div>
+                <i class="bi bi-headset text-info fs-4"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CHARTS ROW ═══ -->
+<div class="row g-3 mb-4">
+    <!-- Revenue Chart -->
+    <div class="col-12 col-xl-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-graph-up me-2 text-primary"></i>Revenue (Last 30 Days)</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary">৳ BDT</span>
+            </div>
+            <div class="card-body" style="padding:20px">
+                <canvas id="revenueChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Donut -->
+    <div class="col-12 col-xl-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-pie-chart me-2 text-primary"></i>Order Status
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                <canvas id="orderStatusChart" width="220" height="220"></canvas>
+                <div class="mt-3 w-100" id="statusLegend"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ LOW STOCK ALERT + QUICK LINKS ═══ -->
+<div class="row g-3">
+    <!-- Low Stock Alert -->
+    <div class="col-12 col-xl-7">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Low Stock Alert</span>
+                <a th:href="@{/admin/products/low-stock}" class="btn btn-sm btn-outline-warning">View All</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead style="background:#f8fafc">
+                            <tr>
+                                <th class="ps-4">Product</th>
+                                <th>SKU</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${lowStockList}" th:if="${#lists.size(lowStockList) > 0}">
+                                <td class="ps-4">
+                                    <div class="fw-500 small" th:text="${p.name}">Product Name</div>
+                                    <div class="text-muted" style="font-size:.75rem" th:text="${p.category?.name}">Category</div>
+                                </td>
+                                <td><code class="small" th:text="${p.sku}">SKU</code></td>
+                                <td>
+                                    <span class="badge bg-danger" th:if="${p.stock == 0}">Out of Stock</span>
+                                    <span class="badge bg-warning text-dark" th:if="${p.stock > 0 and p.stock <= p.lowStockThreshold}"
+                                          th:text="${p.stock} + ' left'">Low</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{'/admin/products/' + ${p.id} + '/edit'}"
+                                       class="btn btn-xs btn-outline-primary" style="font-size:.75rem;padding:3px 10px">
+                                        Restock
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(lowStockList)}">
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>All products are well-stocked!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-12 col-xl-5">
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-lightning-charge me-2 text-warning"></i>Quick Actions</div>
+            <div class="card-body d-grid gap-2">
+                <a th:href="@{/admin/products/new}" class="btn btn-outline-primary btn-sm text-start">
+                    <i class="bi bi-plus-circle me-2"></i>Add New Product
+                </a>
+                <a th:href="@{/admin/orders?status=PENDING}" class="btn btn-outline-warning btn-sm text-start">
+                    <i class="bi bi-hourglass-split me-2"></i>View Pending Orders
+                </a>
+                <a th:href="@{/admin/reviews}" class="btn btn-outline-info btn-sm text-start">
+                    <i class="bi bi-star me-2"></i>Moderate Reviews
+                </a>
+                <a th:href="@{/admin/coupons/new}" class="btn btn-outline-success btn-sm text-start">
+                    <i class="bi bi-ticket-perforated me-2"></i>Create New Coupon
+                </a>
+                <a th:href="@{/admin/users}" class="btn btn-outline-secondary btn-sm text-start">
+                    <i class="bi bi-people me-2"></i>Manage Users
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>
+
+<!-- ═══ CHARTS JS ═══ -->
+<th:block th:fragment="extraScripts">
+<script th:inline="javascript">
+    // Revenue Chart
+    const dailyRevenue = /*[[${dailyRevenue}]]*/ [];
+    const labels = dailyRevenue.map(d => d[0]);
+    const revenues = dailyRevenue.map(d => d[2] || 0);
+
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+            labels: labels.length > 0 ? labels : ['No data'],
+            datasets: [{
+                label: 'Revenue (৳)',
+                data: revenues.length > 0 ? revenues : [0],
+                fill: true,
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99,102,241,.08)',
+                tension: 0.4,
+                pointBackgroundColor: '#6366f1',
+                pointRadius: 4,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' },
+                     ticks: { callback: v => '৳' + v.toLocaleString() }},
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Order Status Donut
+    const statusData = /*[[${orderStatusData}]]*/ [];
+    const statusColors = {
+        'PENDING':'#f59e0b','CONFIRMED':'#3b82f6','PROCESSING':'#8b5cf6',
+        'SHIPPED':'#06b6d4','DELIVERED':'#22c55e','CANCELLED':'#ef4444',
+        'RETURNED':'#94a3b8','REFUNDED':'#64748b'
+    };
+    const statusLabels = statusData.map(d => d[0]);
+    const statusCounts = statusData.map(d => d[1]);
+    const statusColorsArr = statusLabels.map(s => statusColors[s] || '#6366f1');
+
+    new Chart(document.getElementById('orderStatusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{ data: statusCounts, backgroundColor: statusColorsArr, borderWidth: 0, hoverOffset: 4 }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Custom legend
+    const legend = document.getElementById('statusLegend');
+    statusLabels.forEach((label, i) => {
+        legend.innerHTML += `<div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="d-flex align-items-center gap-2">
+                <div style="width:10px;height:10px;border-radius:50%;background:${statusColorsArr[i]}"></div>
+                <small class="text-muted">${label}</small>
+            </div>
+            <small class="fw-500">${statusCounts[i]}</small>
+        </div>`;
+    });
+</script>
+</th:block>
+</html>

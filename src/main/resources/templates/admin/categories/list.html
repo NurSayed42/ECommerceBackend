@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title>Categories</title>
+<th:block th:fragment="content">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h5 class="fw-bold mb-1" style="color:#1e293b">Categories</h5>
+    <small class="text-muted">Manage product categories and subcategories</small></div>
+</div>
+<div class="row g-4">
+    <!-- Add Category Form -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-plus-circle me-2 text-primary"></i>Add Category</div>
+            <div class="card-body">
+                <form th:action="@{/admin/categories/new}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" required placeholder="Category name"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Parent Category</label>
+                        <select name="parentId" class="form-select">
+                            <option value="">None (Top Level)</option>
+                            <option th:each="p : ${parents}" th:value="${p.id}" th:text="${p.name}">Parent</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="2" placeholder="Optional..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Image URL</label>
+                        <input type="url" name="image" class="form-control" placeholder="https://..."/>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" name="featured" id="featuredSwitch"/>
+                        <label class="form-check-label small" for="featuredSwitch">Featured Category</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-lg me-1"></i>Add Category
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category List -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-diagram-3 me-2"></i>All Categories</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead style="background:#f8fafc">
+                        <tr><th class="ps-4">Name</th><th>Slug</th><th>Parent</th><th>Featured</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cat : ${categories}">
+                            <td class="ps-4">
+                                <div class="fw-500 small" style="font-weight:500"
+                                     th:text="${(cat.parent != null ? '└ ' : '') + cat.name}">Name</div>
+                            </td>
+                            <td><code class="small" th:text="${cat.slug}">slug</code></td>
+                            <td><span class="text-muted small" th:text="${cat.parent?.name ?: '—'}">Parent</span></td>
+                            <td>
+                                <span th:if="${cat.featured}" class="badge bg-warning text-dark" style="font-size:.7rem">Featured</span>
+                                <span th:unless="${cat.featured}" class="text-muted small">—</span>
+                            </td>
+                            <td>
+                                <span th:if="${cat.active}" class="badge bg-success">Active</span>
+                                <span th:unless="${cat.active}" class="badge bg-secondary">Inactive</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <form th:action="@{'/admin/categories/' + ${cat.id} + '/toggle'}" method="post" class="d-inline">
+                                        <button class="btn btn-xs btn-outline-secondary" style="font-size:.75rem;padding:3px 8px">
+                                            <i th:classappend="${cat.active ? 'bi-eye-slash' : 'bi-eye'}" class="bi"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{'/admin/categories/' + ${cat.id} + '/delete'}"
+                                          method="post" class="d-inline"
+                                          onsubmit="return confirm('Delete this category?')">
+                                        <button class="btn btn-xs btn-outline-danger" style="font-size:.75rem;padding:3px 8px">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(categories)}">
+                            <td colspan="6" class="text-center py-4 text-muted">No categories yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</th:block>
+<th:block th:fragment="extraScripts"></th:block>
+</html>

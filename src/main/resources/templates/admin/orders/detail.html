@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title th:text="'Order ' + ${order.orderNumber}">Order Detail</title>
+
+<th:block th:fragment="content">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1" style="color:#1e293b">Order Detail</h5>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0" style="font-size:.8rem">
+                <li class="breadcrumb-item"><a th:href="@{/admin/orders}">Orders</a></li>
+                <li class="breadcrumb-item active" th:text="${order.orderNumber}">Order</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i>Print Invoice
+        </button>
+        <a th:href="@{/admin/orders}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- LEFT -->
+    <div class="col-lg-8">
+
+        <!-- Order Info -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-receipt me-2 text-primary"></i>
+                    Order <strong th:text="${order.orderNumber}">ORD-001</strong>
+                </span>
+                <span class="badge badge-status fs-6"
+                      th:classappend="${order.status.name() == 'DELIVERED' ? 'bg-success' :
+                                     order.status.name() == 'PENDING' ? 'bg-warning text-dark' :
+                                     order.status.name() == 'CANCELLED' ? 'bg-danger' :
+                                     order.status.name() == 'SHIPPED' ? 'bg-info' : 'bg-primary'}"
+                      th:text="${order.status}">Status</span>
+            </div>
+            <div class="card-body">
+                <!-- Order Timeline -->
+                <div class="d-flex gap-2 mb-4 flex-wrap">
+                    <div th:each="s : ${statuses}" class="text-center" style="flex:1;min-width:80px">
+                        <div class="rounded-circle mx-auto mb-1 d-flex align-items-center justify-content-center"
+                             style="width:32px;height:32px;font-size:.75rem"
+                             th:classappend="${order.status.ordinal() >= s.ordinal() ?
+                                            'bg-primary text-white' : 'bg-light text-muted border'}">
+                            <i class="bi bi-check-lg" th:if="${order.status.ordinal() > s.ordinal()}"></i>
+                            <i class="bi bi-circle-fill" th:if="${order.status.ordinal() == s.ordinal()}" style="font-size:.4rem"></i>
+                        </div>
+                        <div style="font-size:.65rem" class="text-muted" th:text="${s}">Status</div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead style="background:#f8fafc">
+                            <tr>
+                                <th>Product</th>
+                                <th>Variant</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${order.items}">
+                                <td>
+                                    <div class="fw-500 small" th:text="${item.productName}">Product</div>
+                                    <div class="text-muted" style="font-size:.72rem" th:text="${item.sku}">SKU</div>
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        <span th:if="${item.size}" class="badge bg-light text-dark me-1"
+                                              th:text="${item.size}">S</span>
+                                        <span th:if="${item.color}" class="badge bg-light text-dark"
+                                              th:text="${item.color}">Red</span>
+                                    </div>
+                                </td>
+                                <td th:text="${item.quantity}">1</td>
+                                <td>৳<span th:text="${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 0, 'POINT')}">0</span></td>
+                                <td class="text-end fw-500">৳<span th:text="${#numbers.formatDecimal(item.totalPrice, 1, 'COMMA', 0, 'POINT')}">0</span></td>
+                            </tr>
+                        </tbody>
+                        <tfoot style="background:#f8fafc">
+                            <tr>
+                                <td colspan="4" class="text-end small">Subtotal</td>
+                                <td class="text-end">৳<span th:text="${#numbers.formatDecimal(order.subtotal, 1, 'COMMA', 0, 'POINT')}">0</span></td>
+                            </tr>
+                            <tr th:if="${order.discount != null and order.discount.compareTo(0) > 0}">
+                                <td colspan="4" class="text-end small text-success">Discount</td>
+                                <td class="text-end text-success">-৳<span th:text="${#numbers.formatDecimal(order.discount, 1, 'COMMA', 0, 'POINT')}">0</span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end small">Shipping</td>
+                                <td class="text-end">৳<span th:text="${#numbers.formatDecimal(order.shippingCost, 1, 'COMMA', 0, 'POINT')}">0</span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">Total</td>
+                                <td class="text-end fw-bold text-primary fs-6">৳<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 0, 'POINT')}">0</span></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="mt-3 p-3 rounded" style="background:#f8fafc" th:if="${order.orderNotes}">
+                    <small class="text-muted d-block mb-1"><i class="bi bi-chat-left-text me-1"></i>Order Notes</small>
+                    <small th:text="${order.orderNotes}">Notes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-4">
+
+        <!-- Update Status -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-arrow-repeat me-2 text-primary"></i>Update Status</div>
+            <div class="card-body">
+                <form th:action="@{'/admin/orders/' + ${order.id} + '/status'}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">New Status</label>
+                        <select name="status" class="form-select">
+                            <option th:each="s : ${statuses}"
+                                    th:value="${s}"
+                                    th:text="${s}"
+                                    th:selected="${order.status == s}">Status</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason (for cancel/return)</label>
+                        <textarea name="reason" class="form-control" rows="2"
+                                  placeholder="Optional reason..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-lg me-1"></i>Update Status
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Shipping Info -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-truck me-2 text-warning"></i>Shipping Info</div>
+            <div class="card-body">
+                <div class="small mb-2">
+                    <strong>Address:</strong><br/>
+                    <span class="text-muted" th:text="${order.shippingAddress}">Address</span>
+                </div>
+                <div class="small mb-2" th:if="${order.trackingNumber}">
+                    <strong>Tracking:</strong>
+                    <span class="text-muted ms-1" th:text="${order.trackingNumber}">TRK123</span>
+                </div>
+                <div class="small mb-2" th:if="${order.courierService}">
+                    <strong>Courier:</strong>
+                    <span class="text-muted ms-1" th:text="${order.courierService}">Pathao</span>
+                </div>
+                <div class="small" th:if="${order.estimatedDelivery}">
+                    <strong>Est. Delivery:</strong>
+                    <span class="text-muted ms-1"
+                          th:text="${#temporals.format(order.estimatedDelivery, 'dd MMM yyyy')}">Date</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Info -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-credit-card me-2 text-success"></i>Payment</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <small class="text-muted">Method</small>
+                    <small class="fw-500" th:text="${order.paymentMethod}">COD</small>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <small class="text-muted">Status</small>
+                    <span class="badge"
+                          th:classappend="${order.paymentStatus.name() == 'PAID' ? 'bg-success' :
+                                         order.paymentStatus.name() == 'PENDING' ? 'bg-warning text-dark' : 'bg-danger'}"
+                          th:text="${order.paymentStatus}">Status</span>
+                </div>
+                <div class="d-flex justify-content-between" th:if="${order.couponCode}">
+                    <small class="text-muted">Coupon</small>
+                    <code class="small" th:text="${order.couponCode}">CODE</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Meta -->
+        <div class="card">
+            <div class="card-header"><i class="bi bi-info-circle me-2"></i>Order Meta</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <small class="text-muted">Placed On</small>
+                    <small th:text="${#temporals.format(order.createdAt, 'dd MMM yyyy hh:mm a')}">Date</small>
+                </div>
+                <div class="d-flex justify-content-between mb-2" th:if="${order.deliveredAt}">
+                    <small class="text-muted">Delivered</small>
+                    <small th:text="${#temporals.format(order.deliveredAt, 'dd MMM yyyy')}">Date</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>
+<th:block th:fragment="extraScripts"></th:block>
+</html>

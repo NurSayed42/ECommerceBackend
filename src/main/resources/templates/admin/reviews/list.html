@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title>Reviews</title>
+
+<th:block th:fragment="content">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1" style="color:#1e293b">Review Moderation</h5>
+        <small class="text-muted">Approve or remove customer reviews</small>
+    </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${tab == 'pending' ? 'active' : ''}"
+           th:href="@{/admin/reviews(tab='pending')}">
+            <i class="bi bi-clock me-1"></i>Pending Approval
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${tab == 'reported' ? 'active' : ''}"
+           th:href="@{/admin/reviews(tab='reported')}">
+            <i class="bi bi-flag me-1"></i>Reported
+        </a>
+    </li>
+</ul>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-star me-2 text-warning"></i>
+        <span th:text="${tab == 'reported' ? 'Reported Reviews' : 'Pending Reviews'}">Reviews</span>
+    </div>
+    <div class="card-body p-0">
+        <div th:each="review : ${reviews.content}" class="border-bottom p-4">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+                <div class="flex-grow-1">
+                    <!-- Stars -->
+                    <div class="mb-1">
+                        <span th:each="i : ${#numbers.sequence(1,5)}">
+                            <i th:classappend="${i <= review.rating ? 'bi-star-fill text-warning' : 'bi-star text-muted'}"
+                               class="bi" style="font-size:.9rem"></i>
+                        </span>
+                        <span class="badge bg-success bg-opacity-10 text-success ms-2" style="font-size:.7rem"
+                              th:if="${review.verifiedPurchase}">✓ Verified Purchase</span>
+                    </div>
+
+                    <!-- Title & Comment -->
+                    <div class="fw-500 small mb-1" style="font-weight:600" th:text="${review.title ?: 'No title'}">Title</div>
+                    <div class="text-muted small mb-2" th:text="${review.comment}">Comment</div>
+
+                    <!-- Meta -->
+                    <div class="d-flex gap-3" style="font-size:.75rem;color:#94a3b8">
+                        <span><i class="bi bi-person me-1"></i>
+                            <span th:text="${review.user?.fullName ?: 'Unknown'}">User</span>
+                        </span>
+                        <span><i class="bi bi-box-seam me-1"></i>
+                            <span th:text="${review.product?.name ?: 'Unknown product'}">Product</span>
+                        </span>
+                        <span><i class="bi bi-calendar me-1"></i>
+                            <span th:text="${#temporals.format(review.createdAt, 'dd MMM yyyy')}">Date</span>
+                        </span>
+                        <span th:if="${review.reported}" class="text-danger">
+                            <i class="bi bi-flag-fill me-1"></i>Reported
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <form th:if="${!review.approved}"
+                          th:action="@{'/admin/reviews/' + ${review.id} + '/approve'}"
+                          method="post">
+                        <button class="btn btn-sm btn-success">
+                            <i class="bi bi-check-lg me-1"></i>Approve
+                        </button>
+                    </form>
+                    <span th:if="${review.approved}" class="badge bg-success align-self-start mt-1">Approved</span>
+                    <form th:action="@{'/admin/reviews/' + ${review.id} + '/delete'}"
+                          method="post"
+                          onsubmit="return confirm('Delete this review permanently?')">
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(reviews.content)}" class="text-center py-5 text-muted">
+            <i class="bi bi-star fs-2 d-block mb-2"></i>
+            No reviews to moderate.
+        </div>
+    </div>
+
+    <div class="card-footer d-flex justify-content-between align-items-center py-3"
+         th:if="${reviews.totalPages > 1}">
+        <small class="text-muted">Page <span th:text="${reviews.number + 1}">1</span></small>
+        <nav><ul class="pagination pagination-sm mb-0">
+            <li class="page-item" th:classappend="${reviews.first ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/admin/reviews(page=${reviews.number - 1}, tab=${tab})}">
+                    <i class="bi bi-chevron-left"></i></a>
+            </li>
+            <li class="page-item" th:classappend="${reviews.last ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/admin/reviews(page=${reviews.number + 1}, tab=${tab})}">
+                    <i class="bi bi-chevron-right"></i></a>
+            </li>
+        </ul></nav>
+    </div>
+</div>
+</th:block>
+<th:block th:fragment="extraScripts"></th:block>
+</html>

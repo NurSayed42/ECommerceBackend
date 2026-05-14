@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title>Settings</title>
+<th:block th:fragment="content">
+<div class="mb-4">
+    <h5 class="fw-bold mb-1" style="color:#1e293b">Settings</h5>
+    <small class="text-muted">Configure your store settings</small>
+</div>
+<form th:action="@{/admin/settings/save}" method="post">
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-shop me-2 text-primary"></i>Store Information</div>
+            <div class="card-body">
+                <div class="mb-3"><label class="form-label">Store Name</label>
+                <input type="text" name="storeName" class="form-control" value="My E-Commerce Store"/></div>
+                <div class="mb-3"><label class="form-label">Store Email</label>
+                <input type="email" name="storeEmail" class="form-control" value="info@store.com"/></div>
+                <div class="mb-3"><label class="form-label">Store Phone</label>
+                <input type="text" name="storePhone" class="form-control" value="+880-1700-000000"/></div>
+                <div class="mb-3"><label class="form-label">Store Address</label>
+                <textarea name="storeAddress" class="form-control" rows="2">Dhaka, Bangladesh</textarea></div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-currency-exchange me-2 text-success"></i>Currency & Tax</div>
+            <div class="card-body">
+                <div class="mb-3"><label class="form-label">Currency</label>
+                <select name="currency" class="form-select">
+                    <option value="BDT" selected>BDT - Bangladeshi Taka (৳)</option>
+                    <option value="USD">USD - US Dollar ($)</option>
+                </select></div>
+                <div class="mb-3"><label class="form-label">VAT/Tax (%)</label>
+                <input type="number" name="taxPercent" class="form-control" value="0" min="0" max="100" step="0.01"/></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-gear me-2 text-secondary"></i>General Settings</div>
+            <div class="card-body">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="maintenanceMode" id="maintSwitch"/>
+                    <label class="form-check-label" for="maintSwitch">Maintenance Mode</label>
+                    <div class="form-text text-warning">⚠ Enables site-wide maintenance page</div>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="guestCheckout" id="guestSwitch" checked/>
+                    <label class="form-check-label" for="guestSwitch">Allow Guest Checkout</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="reviewsEnabled" id="reviewSwitch" checked/>
+                    <label class="form-check-label" for="reviewSwitch">Enable Product Reviews</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" name="stockAlert" id="stockSwitch" checked/>
+                    <label class="form-check-label" for="stockSwitch">Low Stock Email Alerts</label>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-envelope me-2 text-info"></i>Email Settings</div>
+            <div class="card-body">
+                <div class="mb-3"><label class="form-label">SMTP Host</label>
+                <input type="text" name="smtpHost" class="form-control" placeholder="smtp.gmail.com"/></div>
+                <div class="mb-3"><label class="form-label">SMTP Port</label>
+                <input type="number" name="smtpPort" class="form-control" value="587"/></div>
+                <div class="mb-3"><label class="form-label">SMTP Username</label>
+                <input type="email" name="smtpUser" class="form-control" placeholder="your@email.com"/></div>
+                <div class="mb-3"><label class="form-label">SMTP Password</label>
+                <input type="password" name="smtpPass" class="form-control" placeholder="App password"/></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex gap-2 justify-content-end">
+    <button type="submit" class="btn btn-primary px-4">
+        <i class="bi bi-check-lg me-1"></i>Save Settings
+    </button>
+</div>
+</form>
+</th:block>
+<th:block th:fragment="extraScripts"></th:block>
+</html>

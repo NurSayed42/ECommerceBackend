@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title>Shipping</title>
+<th:block th:fragment="content">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h5 class="fw-bold mb-1" style="color:#1e293b">Shipping & Logistics</h5>
+    <small class="text-muted">Configure zone-based shipping rates</small></div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-plus-circle me-2 text-primary"></i>Add Shipping Zone</div>
+            <div class="card-body">
+                <form th:action="@{/admin/shipping/new}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Zone Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" required placeholder="Dhaka City"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Districts (comma-separated)</label>
+                        <textarea name="districts" class="form-control" rows="3"
+                                  placeholder="Dhaka, Gazipur, Narayanganj"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Shipping Cost (৳) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">৳</span>
+                            <input type="number" name="shippingCost" class="form-control" required min="0" step="0.01" placeholder="60"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Free Shipping Above (৳)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">৳</span>
+                            <input type="number" name="freeShippingThreshold" class="form-control" min="0" step="0.01" placeholder="1000"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Estimated Delivery (days)</label>
+                        <input type="number" name="estimatedDays" class="form-control" value="3" min="1"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-lg me-1"></i>Add Zone
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-truck me-2 text-warning"></i>Shipping Zones</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead style="background:#f8fafc">
+                        <tr><th class="ps-4">Zone</th><th>Cost</th><th>Free Shipping</th><th>Delivery</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="z : ${zones}">
+                            <td class="ps-4"><div class="fw-500 small" th:text="${z.name}">Zone</div>
+                            <div class="text-muted" style="font-size:.72rem" th:text="${z.districts}">Districts</div></td>
+                            <td class="small">৳<span th:text="${z.shippingCost}">60</span></td>
+                            <td class="small">
+                                <span th:if="${z.freeShippingThreshold != null}">৳<span th:text="${z.freeShippingThreshold}">1000</span>+</span>
+                                <span th:if="${z.freeShippingThreshold == null}" class="text-muted">—</span>
+                            </td>
+                            <td class="small" th:text="${z.estimatedDays} + ' days'">3 days</td>
+                            <td><span th:if="${z.active}" class="badge bg-success">Active</span>
+                            <span th:unless="${z.active}" class="badge bg-secondary">Inactive</span></td>
+                            <td><div class="d-flex gap-1">
+                                <form th:action="@{'/admin/shipping/' + ${z.id} + '/toggle'}" method="post" class="d-inline">
+                                    <button class="btn btn-xs btn-outline-secondary" style="font-size:.75rem;padding:3px 8px">
+                                        <i th:classappend="${z.active ? 'bi-eye-slash' : 'bi-eye'}" class="bi"></i>
+                                    </button>
+                                </form>
+                                <form th:action="@{'/admin/shipping/' + ${z.id} + '/delete'}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete this zone?')">
+                                    <button class="btn btn-xs btn-outline-danger" style="font-size:.75rem;padding:3px 8px">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(zones)}">
+                            <td colspan="6" class="text-center py-4 text-muted">No shipping zones configured.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</th:block>
+<th:block th:fragment="extraScripts"></th:block>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title>Payments</title>
+<th:block th:fragment="content">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h5 class="fw-bold mb-1" style="color:#1e293b">Payments & Transactions</h5>
+    <small class="text-muted">View all payment records</small></div>
+    <div class="card p-3 d-flex flex-row gap-3 align-items-center" style="border-radius:12px">
+        <div><div class="text-muted small">Total Revenue</div>
+        <div class="fw-bold text-success">৳<span th:text="${#numbers.formatDecimal(totalRevenue ?: 0, 1, 'COMMA', 0, 'POINT')}">0</span></div></div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header"><i class="bi bi-credit-card me-2 text-success"></i>Transaction Log</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead style="background:#f8fafc">
+                <tr><th class="ps-4">Transaction ID</th><th>Order</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${payments.content}">
+                    <td class="ps-4"><code class="small" th:text="${p.transactionId}">TXN</code></td>
+                    <td><a th:href="@{'/admin/orders/' + ${p.order.orderNumber}}"
+                           class="text-decoration-none small" style="color:#6366f1"
+                           th:text="${p.order.orderNumber}">ORD</a></td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary" th:text="${p.method}">COD</span></td>
+                    <td class="fw-500 small">৳<span th:text="${#numbers.formatDecimal(p.amount, 1, 'COMMA', 0, 'POINT')}">0</span></td>
+                    <td><span class="badge"
+                          th:classappend="${p.status.name() == 'PAID' ? 'bg-success' : p.status.name() == 'PENDING' ? 'bg-warning text-dark' : p.status.name() == 'REFUNDED' ? 'bg-info' : 'bg-danger'}"
+                          th:text="${p.status}">Status</span></td>
+                    <td class="small" th:text="${#temporals.format(p.createdAt, 'dd MMM yyyy HH:mm')}">Date</td>
+                    <td>
+                        <button class="btn btn-xs btn-outline-warning"
+                                style="font-size:.75rem;padding:3px 8px"
+                                th:if="${p.status.name() == 'PAID'}"
+                                onclick="document.getElementById('refundModal_' + [[${p.order.id}]]).style.display='flex'">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Refund
+                        </button>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(payments.content)}">
+                    <td colspan="7" class="text-center py-5 text-muted">No transactions yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between py-3" th:if="${payments.totalPages > 1}">
+        <small class="text-muted">Page <span th:text="${payments.number + 1}">1</span> of <span th:text="${payments.totalPages}">1</span></small>
+        <nav><ul class="pagination pagination-sm mb-0">
+            <li class="page-item" th:classappend="${payments.first ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/admin/payments(page=${payments.number - 1})}"><i class="bi bi-chevron-left"></i></a></li>
+            <li class="page-item" th:classappend="${payments.last ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/admin/payments(page=${payments.number + 1})}"><i class="bi bi-chevron-right"></i></a></li>
+        </ul></nav>
+    </div>
+</div>
+</th:block>
+<th:block th:fragment="extraScripts"></th:block>
+</html>

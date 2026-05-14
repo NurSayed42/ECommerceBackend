@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title th:text="${banner.id != null ? 'Edit Banner' : 'New Banner'}">Banner</title>
+
+<th:block th:fragment="content">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1" style="color:#1e293b"
+            th:text="${banner.id != null ? 'Edit Banner' : 'Add Banner'}">Banner</h5>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0" style="font-size:.8rem">
+            <li class="breadcrumb-item"><a th:href="@{/admin/banners}">Banners</a></li>
+            <li class="breadcrumb-item active">Form</li>
+        </ol></nav>
+    </div>
+    <a th:href="@{/admin/banners}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+</div>
+
+<form th:action="${banner.id != null ? '/admin/banners/' + banner.id + '/edit' : '/admin/banners/new'}"
+      method="post">
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-image me-2 text-info"></i>Banner Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Title <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-control"
+                           th:value="${banner.title}" required placeholder="Summer Sale Banner"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image URL (Desktop) <span class="text-danger">*</span></label>
+                    <input type="url" name="imageUrl" class="form-control" id="imageUrlInput"
+                           th:value="${banner.imageUrl}" required
+                           placeholder="https://example.com/banner.jpg"
+                           oninput="previewImage(this.value)"/>
+                </div>
+
+                <!-- Image Preview -->
+                <div id="imagePreview" class="mb-3" style="display:none">
+                    <label class="form-label">Preview</label>
+                    <img id="previewImg" src="" alt="Preview"
+                         style="max-width:100%;border-radius:8px;max-height:200px;object-fit:cover"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mobile Image URL</label>
+                    <input type="url" name="mobileImageUrl" class="form-control"
+                           th:value="${banner.mobileImageUrl}"
+                           placeholder="https://example.com/banner-mobile.jpg"/>
+                    <div class="form-text">Optional. Uses desktop image if not provided.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Link URL</label>
+                    <input type="text" name="linkUrl" class="form-control"
+                           th:value="${banner.linkUrl}"
+                           placeholder="/products?category=sale"/>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Position</label>
+                        <select name="position" class="form-select">
+                            <option value="HOME_HERO" th:selected="${banner.position == 'HOME_HERO'}">Home Hero (Main Slider)</option>
+                            <option value="HOME_MIDDLE" th:selected="${banner.position == 'HOME_MIDDLE'}">Home Middle</option>
+                            <option value="HOME_BOTTOM" th:selected="${banner.position == 'HOME_BOTTOM'}">Home Bottom</option>
+                            <option value="CATEGORY" th:selected="${banner.position == 'CATEGORY'}">Category Page</option>
+                            <option value="POPUP" th:selected="${banner.position == 'POPUP'}">Popup</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Sort Order</label>
+                        <input type="number" name="sortOrder" class="form-control"
+                               th:value="${banner.sortOrder ?: 0}" min="0"/>
+                        <div class="form-text">Lower number = higher priority</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Start Date</label>
+                        <input type="datetime-local" name="startDate" class="form-control"
+                               th:value="${banner.startDate != null ? #temporals.format(banner.startDate, 'yyyy-MM-dd''T''HH:mm') : ''}"/>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">End Date</label>
+                        <input type="datetime-local" name="endDate" class="form-control"
+                               th:value="${banner.endDate != null ? #temporals.format(banner.endDate, 'yyyy-MM-dd''T''HH:mm') : ''}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-send me-2 text-primary"></i>Publish</div>
+            <div class="card-body">
+                <div class="form-check form-switch mb-4">
+                    <input class="form-check-input" type="checkbox" name="active" id="activeSwitch"
+                           th:checked="${banner.active == null or banner.active}"/>
+                    <label class="form-check-label small" for="activeSwitch">Active (visible on site)</label>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        <span th:text="${banner.id != null ? 'Update Banner' : 'Create Banner'}">Save</span>
+                    </button>
+                    <a th:href="@{/admin/banners}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+</th:block>
+
+<th:block th:fragment="extraScripts">
+<script>
+    function previewImage(url) {
+        const preview = document.getElementById('imagePreview');
+        const img = document.getElementById('previewImg');
+        if (url) {
+            img.src = url;
+            img.onload = () => preview.style.display = '';
+            img.onerror = () => preview.style.display = 'none';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    // Trigger preview on load if editing
+    const existingUrl = document.getElementById('imageUrlInput').value;
+    if (existingUrl) previewImage(existingUrl);
+</script>
+</th:block>
+</html>

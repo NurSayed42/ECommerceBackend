@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout/base :: layout(~{::title}, ~{::content}, ~{::extraScripts})}">
+<title>Coupons</title>
+
+<th:block th:fragment="content">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1" style="color:#1e293b">Coupons & Promotions</h5>
+        <small class="text-muted">Manage discount codes and offers</small>
+    </div>
+    <a th:href="@{/admin/coupons/new}" class="btn btn-sm btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>New Coupon
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header"><i class="bi bi-ticket-perforated me-2 text-primary"></i>All Coupons</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead style="background:#f8fafc">
+                <tr>
+                    <th class="ps-4">Code</th>
+                    <th>Type</th>
+                    <th>Discount</th>
+                    <th>Min Order</th>
+                    <th>Usage</th>
+                    <th>Validity</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="c : ${coupons.content}">
+                    <td class="ps-4">
+                        <code class="fw-bold" style="font-size:.9rem;color:#6366f1" th:text="${c.code}">CODE</code>
+                        <div class="text-muted small" th:text="${c.description}">Desc</div>
+                    </td>
+                    <td>
+                        <span class="badge bg-primary bg-opacity-10 text-primary"
+                              th:text="${c.type}">PERCENTAGE</span>
+                    </td>
+                    <td>
+                        <span th:if="${c.type.name() == 'PERCENTAGE'}"
+                              th:text="${c.discountValue} + '%'">10%</span>
+                        <span th:if="${c.type.name() == 'FIXED_AMOUNT'}"
+                              th:text="'৳' + ${c.discountValue}">৳100</span>
+                        <span th:if="${c.type.name() == 'FREE_SHIPPING'}">Free Shipping</span>
+                        <span th:if="${c.type.name() == 'BUY_ONE_GET_ONE'}">BOGO</span>
+                    </td>
+                    <td>
+                        <span th:if="${c.minOrderAmount != null}"
+                              th:text="'৳' + ${#numbers.formatDecimal(c.minOrderAmount, 1, 'COMMA', 0, 'POINT')}">৳500</span>
+                        <span th:if="${c.minOrderAmount == null}" class="text-muted">—</span>
+                    </td>
+                    <td>
+                        <div class="small">
+                            <span th:text="${c.usageCount}">0</span>
+                            <span class="text-muted">/</span>
+                            <span th:text="${c.usageLimit == 0 ? '∞' : c.usageLimit}">∞</span>
+                        </div>
+                        <div class="progress mt-1" style="height:4px;width:80px"
+                             th:if="${c.usageLimit > 0}">
+                            <div class="progress-bar bg-primary"
+                                 th:style="'width:' + ${(c.usageCount * 100 / c.usageLimit)} + '%'"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="small" th:text="${#temporals.format(c.startDate, 'dd MMM')} + ' – ' + ${#temporals.format(c.endDate, 'dd MMM yyyy')}">
+                            Date range
+                        </div>
+                    </td>
+                    <td>
+                        <form th:action="@{'/admin/coupons/' + ${c.id} + '/toggle'}" method="post" class="d-inline">
+                            <button type="submit" class="badge border-0"
+                                    style="cursor:pointer"
+                                    th:classappend="${c.active ? 'bg-success' : 'bg-secondary'}"
+                                    th:text="${c.active ? 'Active' : 'Inactive'}">Status</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form th:action="@{'/admin/coupons/' + ${c.id} + '/delete'}"
+                              method="post" class="d-inline"
+                              onsubmit="return confirm('Delete this coupon?')">
+                            <button class="btn btn-xs btn-outline-danger" style="font-size:.75rem;padding:3px 8px">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(coupons.content)}">
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-ticket-perforated fs-2 d-block mb-2"></i>
+                        No coupons yet. <a th:href="@{/admin/coupons/new}">Create one</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</th:block>
+<th:block th:fragment="extraScripts"></th:block>
+</html>
